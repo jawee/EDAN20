@@ -6,7 +6,7 @@ import guide.Features;
 
 /**
  *
- * @author Pierre Nugues
+ * @author Pierre  Nugues
  */
 // The class to store ARFF compatible data
 // The data will be use to train the classifier
