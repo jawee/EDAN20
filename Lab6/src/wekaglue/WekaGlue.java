@@ -21,6 +21,7 @@ public class WekaGlue {
             dataset = new Instances(new FileReader(datasetName), 0);
             dataset.setClassIndex(dataset.numAttributes() - 1);
 
+            System.out.println(dataset.numAttributes());
             instance = new DenseInstance(dataset.numAttributes());
             instance.setDataset(dataset);
 

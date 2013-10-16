@@ -2,12 +2,16 @@ package parser;
 
 import java.util.*;
 import java.io.File;
+
 import format.CONLLCorpus;
 import format.Constants;
 import format.Word;
 import guide.Guide;
 import guide.Guide4;
+import guide.Guide6;
+
 import java.io.IOException;
+
 import wekaglue.WekaGlue;
 
 /**
@@ -31,6 +35,37 @@ public class Parser {
             transition = oracle.predict();
             // Executes the predicted transition. If not possible, then shift
             // COMPLETE THE CODE HERE
+            String[] split = transition.split("\\.");
+            transition = split[0];
+            String deprel = "";
+            if(split.length>1) {
+            	deprel = split[1];
+            }
+            
+            if(transition.contains("la")) {
+            	if(parserState.canLeftArc()) {
+            		parserState.doLeftArc(deprel);
+            		parserState.addTransition("la");
+            	} else {
+            		parserState.doShift();
+            		parserState.addTransition("sh");
+            	}
+            } else if(transition.contains("re")) {
+            	if(parserState.canReduce()) {
+            		parserState.doReduce();
+            		parserState.addTransition("re");
+            	} else {
+            		parserState.doShift();
+            		parserState.addTransition("sh");
+            	}
+            } else if(transition.contains("ra")) {
+            	parserState.doRightArc(deprel);
+            	parserState.addTransition("ra");
+            } else {
+            	parserState.doShift();
+            	parserState.addTransition("sh");
+            }
+            
         }
 
         // We empty the stack. When words have no head, we set it to root
@@ -81,7 +116,7 @@ public class Parser {
 
     public static void main(String[] args) throws IOException {
         File testSet = new File(Constants.TEST_SET);
-        File testSetParsed = new File(Constants.TEST_SET_PARSED);
+        File testSetParsed = new File(Constants.TEST_SET_PARSED_6_L);
         CONLLCorpus testCorpus = new CONLLCorpus();
         WekaGlue wekaModel = new WekaGlue();
 
@@ -100,12 +135,12 @@ public class Parser {
             return;
         }
         sentenceList = testCorpus.loadFile(testSet);
-        wekaModel.create(Constants.ARFF_MODEL, Constants.ARFF_FILE);
+        wekaModel.create(Constants.ARFF_MODEL_6_L, Constants.ARFF_FILE_6_L);
 
         System.out.println("Parsing the sentences...");
         for (int i = 0; i < sentenceList.size(); i++) {
             parserState = new ParserState(sentenceList.get(i));
-            oracle = new Guide4(wekaModel, parserState);
+            oracle = new Guide6(wekaModel, parserState);
             parser = new Parser(parserState, oracle);
             graph = parser.parse();
             parsedList.add(graph);
